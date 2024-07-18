@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WebAPI_Livros.Data;
+using WebAPI_Livros.Repositories.Autor;
 using WebAPI_Livros.Services.Autor;
 using WebAPI_Livros.Services.Livro;
 
@@ -14,6 +15,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IAutorInterface, AutorService>();
 builder.Services.AddScoped<ILivroInterface, LivroService>();
+builder.Services.AddScoped<IAutorRepository, AutorRepository>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

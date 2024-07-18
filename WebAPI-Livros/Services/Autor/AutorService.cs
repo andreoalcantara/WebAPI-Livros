@@ -3,15 +3,17 @@ using WebAPI_Livros.Data;
 using WebAPI_Livros.DTO.Autor;
 using WebAPI_Livros.models;
 using WebAPI_Livros.Models;
+using WebAPI_Livros.Repositories.Autor;
 
 namespace WebAPI_Livros.Services.Autor
 {
     public class AutorService : IAutorInterface
     {
-        private readonly AppDbContext _context;
-        public AutorService(AppDbContext context)
+        private readonly IAutorRepository _autorRepository;
+
+        public AutorService(IAutorRepository autorRepository)
         {
-            _context = context;
+            _autorRepository = autorRepository;
         }
 
         public async Task<ResponseModel<AutorModel>> BuscarAutorPorID(int idAutor)
@@ -20,8 +22,8 @@ namespace WebAPI_Livros.Services.Autor
 
             try
             {
-                var autor = await _context.Autores.FirstOrDefaultAsync(autorBanco => autorBanco.Id == idAutor);
-                resposta.Dados = autor;
+                var autor = await _autorRepository.GetAutorById(idAutor);
+                resposta.Dados =  autor;
                 if(resposta.Dados == null)
                 {
                     resposta.Mensagem = "Nenhum autor encontrado!";
@@ -44,15 +46,14 @@ namespace WebAPI_Livros.Services.Autor
 
             try 
             {
-                var livro = await _context.Livros
-                    .Include(a => a.Autor)
-                    .FirstOrDefaultAsync(livroBanco => livroBanco.Id == idLivro);
-                if(livro == null)
+                var autor = await _autorRepository.GetAutorByLivroId(idLivro);
+
+                if(autor == null)
                 {
                     resposta.Mensagem = "Nenhum autor encontrado!";
                     return resposta;
                 }
-                resposta.Dados = livro.Autor;
+                resposta.Dados = autor;
                 resposta.Mensagem = "Autor encontrado com sucesso!";
                 return resposta;
             }
@@ -69,7 +70,7 @@ namespace WebAPI_Livros.Services.Autor
             ResponseModel<List<AutorModel>> resposta = new ResponseModel<List<AutorModel>>();
             try
             {
-                var autores = await _context.Autores.ToListAsync();
+                var autores = await _autorRepository.GetAllAutores();
 
                 resposta.Dados = autores;
                 resposta.Mensagem = "Todos os autores listados com sucesso!";
@@ -95,10 +96,9 @@ namespace WebAPI_Livros.Services.Autor
                     Sobrenome = autorCriacaoDto.Sobrenome
                 };
 
-                _context.Autores.Add(autor);
-                await _context.SaveChangesAsync();
+                await _autorRepository.AddAutor(autor);
                 
-                resposta.Dados = await _context.Autores.ToListAsync();
+                resposta.Dados = await _autorRepository.GetAllAutores();
                 resposta.Mensagem = "Autor criado com sucesso!";
 
                 return resposta;
@@ -117,7 +117,7 @@ namespace WebAPI_Livros.Services.Autor
 
             try
             {
-                var autorBanco = await _context.Autores.FirstOrDefaultAsync(autorBanco => autorBanco.Id == idAutor);
+                var autorBanco = await _autorRepository.GetAutorById(idAutor);
                 if(autorBanco == null)
                 {
                     resposta.Mensagem = "Autor não encontrado!";
@@ -127,10 +127,9 @@ namespace WebAPI_Livros.Services.Autor
                 autorBanco.Nome = autor.Nome;
                 autorBanco.Sobrenome = autor.Sobrenome;
 
-                _context.Autores.Update(autorBanco);
-                await _context.SaveChangesAsync();
+                await _autorRepository.UpdateAutor(autorBanco);
 
-                resposta.Dados = await _context.Autores.ToListAsync();
+                resposta.Dados = await _autorRepository.GetAllAutores();
                 resposta.Mensagem = "Autor editado com sucesso!";
                 return resposta;
 
@@ -149,17 +148,16 @@ namespace WebAPI_Livros.Services.Autor
 
             try
             {
-                var autor = await _context.Autores.FirstOrDefaultAsync(autorBanco => autorBanco.Id == idAutor);
+                var autor = await _autorRepository.GetAutorById(idAutor);
                 if (autor == null)
                 {
                     resposta.Mensagem = "Autor não encontrado!";
                     return resposta;
                 }
 
-                _context.Autores.Remove(autor);
-                await _context.SaveChangesAsync();
+                await _autorRepository.RemoveAutor(autor);
 
-                resposta.Dados = await _context.Autores.ToListAsync();
+                resposta.Dados = await _autorRepository.GetAllAutores();
                 resposta.Mensagem = "Autor removido com sucesso!";
                 return resposta;
 

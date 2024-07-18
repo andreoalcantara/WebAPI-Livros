@@ -1,17 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebAPI_Livros.Data;
 using WebAPI_Livros.DTO.Livro;
 using WebAPI_Livros.models;
 using WebAPI_Livros.Models;
+using WebAPI_Livros.Repositories.Autor;
+using WebAPI_Livros.Repositories.Livro;
 
 namespace WebAPI_Livros.Services.Livro
 {
     public class LivroService : ILivroInterface
     {
-        private readonly AppDbContext _context;
-        public LivroService(AppDbContext context)
+        private readonly ILivroRepository _livroRepository;
+        private readonly IAutorRepository _autorRepository;
+
+        public LivroService(ILivroRepository livroRepository, IAutorRepository autorRepository)
         {
-            _context = context;
+            _livroRepository = livroRepository;
+            _autorRepository = autorRepository;
         }
 
         public async Task<ResponseModel<LivroModel>> BuscarLivroPorID(int idLivro)
@@ -20,7 +24,7 @@ namespace WebAPI_Livros.Services.Livro
 
             try
             {
-                var livro = await _context.Livros.Include(a => a.Autor).FirstOrDefaultAsync(livroBanco => livroBanco.Id == idLivro);
+                var livro = await _livroRepository.BuscarLivroPorID(idLivro);
                 resposta.Dados = livro;
                 if(resposta.Dados == null)
                 {
@@ -45,11 +49,8 @@ namespace WebAPI_Livros.Services.Livro
 
             try
             {
-                var livros = await _context.Livros
-                    .Include(a => a.Autor)
-                    .Where(livroBanco => livroBanco.Autor.Id == idAutor)
-                    .ToListAsync();
-                resposta.Dados = livros;
+                var livros = await _livroRepository.BuscarLivrosPorIdAutor(idAutor);
+                resposta.Dados = livros.Dados;
                 if(resposta.Dados == null)
                 {
                     resposta.Mensagem = "Nenhum livro encontrado!";
@@ -57,7 +58,6 @@ namespace WebAPI_Livros.Services.Livro
                 }
                 resposta.Mensagem = "Livro(s) encontrados com sucesso!";
                 return resposta;
-
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace WebAPI_Livros.Services.Livro
             ResponseModel<List<LivroModel>> resposta = new ResponseModel<List<LivroModel>>();
             try
             {
-                var autor = await _context.Autores.FirstOrDefaultAsync(autorBanco => autorBanco.Id == livro.AutorId);
+                var autor = await _autorRepository.GetAutorById(livro.AutorId);
                 if(autor == null)
                 {
                     resposta.Mensagem = "Autor não encontrado!";
@@ -84,10 +84,9 @@ namespace WebAPI_Livros.Services.Livro
                     Autor = autor
                 };
 
-                _context.Livros.Add(novoLivro);
-                await _context.SaveChangesAsync();
+                await _livroRepository.AddLivro(novoLivro);
 
-                resposta.Dados = await _context.Livros.Include(a => a.Autor).ToListAsync();
+                resposta.Dados = await _livroRepository.GetAllLivros();
                 resposta.Mensagem = "Livro criado com sucesso!";
                 return resposta;
             }
@@ -104,13 +103,13 @@ namespace WebAPI_Livros.Services.Livro
             ResponseModel<List<LivroModel>> resposta = new ResponseModel<List<LivroModel>>();
             try
             {
-                var livro = await _context.Livros.FirstOrDefaultAsync(livroBanco => livroBanco.Id == idLivro);
+                var livro = await _livroRepository.BuscarLivroPorID(idLivro);
                 if(livro == null)
                 {
                     resposta.Mensagem = "Livro não encontrado!";
                     return resposta;
                 }
-                var autor = await _context.Autores.FirstOrDefaultAsync(autorBanco => autorBanco.Id == livroDto.AutorId);
+                var autor = await _autorRepository.GetAutorById(livroDto.AutorId);
                 if(autor == null)
                 {
                     resposta.Mensagem = "Autor não encontrado!";
@@ -119,10 +118,9 @@ namespace WebAPI_Livros.Services.Livro
                 livro.Titulo = livroDto.Titulo;
                 livro.Autor = autor;
 
-                _context.Livros.Update(livro);
-                await _context.SaveChangesAsync();
+                await _livroRepository.UpdateLivro(livro);
 
-                resposta.Dados = await _context.Livros.Include(a => a.Autor).ToListAsync();
+                resposta.Dados = await _livroRepository.GetAllLivros();
                 resposta.Mensagem = "Livro editado com sucesso!";
                 return resposta;
             }
@@ -139,7 +137,7 @@ namespace WebAPI_Livros.Services.Livro
             ResponseModel<List<LivroModel>> resposta = new ResponseModel<List<LivroModel>>();
             try
             {
-                resposta.Dados = await _context.Livros.Include(a => a.Autor).ToListAsync();
+                resposta.Dados = await _livroRepository.GetAllLivros();
                 resposta.Mensagem = "Livros listados com sucesso!";
                 return resposta;
             }
@@ -156,16 +154,15 @@ namespace WebAPI_Livros.Services.Livro
             ResponseModel<List<LivroModel>> resposta = new ResponseModel<List<LivroModel>>();
             try
             {
-                var livro =  await _context.Livros.FirstOrDefaultAsync(livroBanco => livroBanco.Id == idLivro);
+                var livro =  await _livroRepository.GetLivroById(idLivro);
                 if (livro == null)
                 {
                     resposta.Mensagem = "Livro não encontrado!";
                     return resposta;
                 }
-                _context.Livros.Remove(livro);
-                _context.SaveChanges();
+                await _livroRepository.RemoveLivro(livro);
 
-                resposta.Dados = await _context.Livros.Include(a => a.Autor).ToListAsync();
+                resposta.Dados = await _livroRepository.GetAllLivros();
                 resposta.Mensagem = "Livro removido com sucesso!";
                 return resposta;
             }
