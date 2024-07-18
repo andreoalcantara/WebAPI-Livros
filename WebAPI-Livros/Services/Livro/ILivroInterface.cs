@@ -1,5 +1,4 @@
-﻿using WebAPI_Livros.DTO.Autor;
-using WebAPI_Livros.DTO.Livro;
+﻿using WebAPI_Livros.DTO.Livro;
 using WebAPI_Livros.models;
 using WebAPI_Livros.Models;
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebAPI_Livros.DTO.Livro;
 using WebAPI_Livros.models;
 using WebAPI_Livros.Models;

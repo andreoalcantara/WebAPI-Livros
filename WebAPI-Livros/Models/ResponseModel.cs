@@ -1,6 +1,4 @@
-﻿using WebAPI_Livros.Migrations;
-
-namespace WebAPI_Livros.Models
+﻿namespace WebAPI_Livros.Models
 {
     public class ResponseModel<T>
     {

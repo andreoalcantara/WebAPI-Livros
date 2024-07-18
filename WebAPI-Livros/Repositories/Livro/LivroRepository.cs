@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebAPI_Livros.Data;
 using WebAPI_Livros.models;
-using WebAPI_Livros.Services.Livro;
 
 namespace WebAPI_Livros.Repositories.Livro
 {

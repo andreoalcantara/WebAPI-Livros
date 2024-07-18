@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using WebAPI_Livros.models;
 
 namespace WebAPI_Livros.Data

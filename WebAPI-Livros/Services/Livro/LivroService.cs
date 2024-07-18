@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WebAPI_Livros.DTO.Livro;
+﻿using WebAPI_Livros.DTO.Livro;
 using WebAPI_Livros.models;
 using WebAPI_Livros.Models;
 using WebAPI_Livros.Repositories.Autor;

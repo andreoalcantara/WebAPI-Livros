@@ -1,6 +1,4 @@
-﻿using WebAPI_Livros.models;
-
-namespace WebAPI_Livros.DTO.Livro
+﻿namespace WebAPI_Livros.DTO.Livro
 {
     public class LivroDto
     {
